@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Purrfect Supply Chain: Bullwhip Village — User + Developer Report</title>
+<meta name="description" content="Player manual and developer/technical report for Purrfect Supply Chain: Bullwhip Village v1.0.0 — a cozy real-time supply-chain city sim about the Bullwhip Effect." />
+<style>
+  /* ============ Cozy outlined-illustration theme ============ */
+  :root{
+    --bg:#f7efdf; --panel:#fffaef; --panel2:#fbf3e2;
+    --ink:#4a3b2e; --ink-soft:#6f5d4c; --muted:#99866f;
+    --outline:rgba(96,74,53,.35); --outline-strong:#604a35;
+    --latte:#c99e6a; --latte-deep:#a67c4d; --matcha:#a8bf8a; --matcha-deep:#7d9a5e;
+    --rose:#f0a2a8; --rose-deep:#d97a86; --lavender:#b39ddb; --lavender-deep:#8f74c9;
+    --sky:#8fc3d9; --sky-deep:#63a4c0; --butter:#f0cc85; --butter-deep:#cfa254;
+    --radius:18px; --radius-sm:12px;
+    --shadow:0 10px 30px rgba(74,63,58,.09);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; color:var(--ink);
+    font-family:"Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+    background:
+      radial-gradient(900px 420px at 8% -4%, rgba(240,162,168,.20), transparent 60%),
+      radial-gradient(900px 420px at 96% 2%, rgba(179,157,219,.20), transparent 60%),
+      radial-gradient(1000px 500px at 50% 108%, rgba(168,191,138,.22), transparent 60%),
+      radial-gradient(rgba(96,74,53,.045) 1px, transparent 1.4px),
+      linear-gradient(180deg,#f9f1e2,#f6efe3 55%,#f0ecdd);
+    background-size:auto,auto,auto,22px 22px,100% 100%;
+  }
+  /* paper grain overlay */
+  body::after{
+    content:""; position:fixed; inset:0; z-index:120; pointer-events:none; opacity:.05; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  h1,h2,h3,h4{margin:0 0 .5em; font-weight:900; letter-spacing:-.01em}
+  p{line-height:1.7; color:var(--ink-soft)}
+  a{color:var(--latte-deep)}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre{
+    background:#3d3227; color:#f4e9d4; border:2px solid var(--outline-strong);
+    border-radius:var(--radius-sm); padding:14px 16px; overflow:auto; font-size:.85rem; line-height:1.6;
+  }
+  pre .c{color:#b7a68c}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 22px}
+  section{scroll-margin-top:86px; padding:56px 0 18px}
+  .sec-kicker{
+    display:inline-flex; gap:8px; align-items:center; font-size:.72rem; font-weight:900;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--latte-deep);
+    background:#f1e6d2; border:1.5px solid var(--outline); border-radius:999px; padding:5px 14px; margin-bottom:12px;
+  }
+  .sec-kicker.dev{background:#efe7fb; color:var(--lavender-deep)}
+  section>.wrap>h2{
+    font-size:2.1rem;
+    text-shadow:0 0 24px rgba(201,158,106,.35);
+  }
+  .lead{max-width:760px; font-size:1.04rem}
+
+  /* ============ Nav ============ */
+  nav{
+    position:sticky; top:0; z-index:100; backdrop-filter:blur(10px);
+    background:rgba(255,250,239,.88); border-bottom:2px solid var(--outline);
+  }
+  .nav-inner{display:flex; align-items:center; gap:18px; max-width:1180px; margin:0 auto; padding:10px 22px}
+  .brand{display:flex; gap:10px; align-items:center; font-weight:900; white-space:nowrap; font-size:.95rem}
+  .brand .paw{
+    width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+    background:var(--latte); color:#fff; border:2px solid var(--outline-strong); font-size:1rem;
+    box-shadow:0 2px 0 var(--outline-strong);
+  }
+  .nav-links{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{
+    flex:0 0 auto; text-decoration:none; color:var(--ink-soft); font-size:.7rem; font-weight:900;
+    letter-spacing:.1em; text-transform:uppercase; padding:8px 12px; border-radius:999px; border:2px solid transparent;
+  }
+  .nav-links a.active{background:#f1e6d2; color:var(--latte-deep); border-color:var(--outline)}
+
+  /* ============ Hero ============ */
+  header.hero{padding:64px 0 30px; position:relative; overflow:hidden}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:34px; align-items:center}
+  .kicker{font-size:.74rem; font-weight:900; letter-spacing:.18em; text-transform:uppercase; color:var(--rose-deep)}
+  .hero h1{
+    font-size:3.4rem; line-height:1.04; margin:14px 0 6px;
+    background:linear-gradient(115deg,var(--latte-deep),var(--rose-deep) 40%,var(--lavender-deep) 75%,var(--matcha-deep));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero .ver{font-weight:900; color:var(--muted); letter-spacing:.08em}
+  .hero .sub{font-size:1.12rem; max-width:560px}
+  .techline{font-family:ui-monospace,Menlo,monospace; font-size:.8rem; color:var(--muted); margin:10px 0 16px}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 22px}
+  .chip{
+    font-size:.72rem; font-weight:900; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 13px; border-radius:999px; border:1.5px solid var(--outline);
+  }
+  .chip.c1{background:#fbeed3;color:var(--butter-deep)} .chip.c2{background:#fdeef0;color:var(--rose-deep)}
+  .chip.c3{background:#eef4e6;color:var(--matcha-deep)} .chip.c4{background:#efe7fb;color:var(--lavender-deep)}
+  .chip.c5{background:#e5f0f5;color:var(--sky-deep)}
+  .cta{display:flex; gap:12px; flex-wrap:wrap}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:900;
+    border-radius:999px; padding:13px 24px; border:2px solid var(--outline-strong);
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
+  }
+  .btn.primary{background:var(--latte); color:#fff; box-shadow:0 3px 0 var(--outline-strong)}
+  .btn.primary:hover{transform:translateY(-2px); box-shadow:0 5px 0 var(--outline-strong)}
+  .btn.ghost{color:var(--ink-soft)}
+  .btn.ghost:hover{transform:translateY(-2px)}
+
+  /* ============ Cards / grids ============ */
+  .card{
+    background:var(--panel); border:2px solid var(--outline); border-radius:var(--radius);
+    box-shadow:0 4px 0 rgba(96,74,53,.12), var(--shadow); padding:20px;
+    transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+  }
+  .card:hover{transform:translateY(-4px); box-shadow:0 6px 0 rgba(96,74,53,.14), 0 16px 34px rgba(74,63,58,.12)}
+  .grid{display:grid; gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  .stat{
+    text-align:center; padding:22px 12px; border-radius:var(--radius); border:2px solid var(--outline);
+    background:var(--panel2);
+  }
+  .stat b{display:block; font-size:2.2rem; color:var(--latte-deep)}
+  .stat span{font-size:.76rem; font-weight:850; text-transform:uppercase; letter-spacing:.08em; color:var(--muted)}
+  .feature h3{display:flex; gap:10px; align-items:center}
+  .feature .ic{
+    width:38px;height:38px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:1.1rem;
+    background:#f1e6d2;border:2px solid var(--outline);
+  }
+  .tagline{font-size:.68rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1.5px solid var(--outline)}
+  .tag-user{background:#eef4e6;color:var(--matcha-deep)} .tag-dev{background:#efe7fb;color:var(--lavender-deep)}
+
+  /* ============ Tables ============ */
+  table{width:100%; border-collapse:collapse; background:var(--panel); border:2px solid var(--outline); border-radius:var(--radius-sm); overflow:hidden; font-size:.92rem}
+  th,td{padding:11px 14px; text-align:left; border-bottom:1.5px solid var(--outline); vertical-align:top}
+  th{background:#f1e6d2; font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--latte-deep)}
+  tr:last-child td{border-bottom:0}
+  td b{color:var(--ink)}
+  .ok{color:var(--matcha-deep); font-weight:900} .warn{color:var(--butter-deep); font-weight:900}
+  .key{
+    display:inline-block; min-width:34px; text-align:center; padding:4px 10px; font-weight:900; font-size:.82rem;
+    background:#fff; border:2px solid var(--outline-strong); border-bottom-width:4px; border-radius:8px;
+  }
+
+  /* ============ Steps ============ */
+  ol.steps{counter-reset:s; list-style:none; padding:0; margin:0; display:grid; gap:10px}
+  ol.steps li{
+    counter-increment:s; position:relative; padding:14px 16px 14px 58px; background:var(--panel);
+    border:2px solid var(--outline); border-radius:var(--radius-sm); color:var(--ink-soft); line-height:1.6;
+  }
+  ol.steps li::before{
+    content:counter(s,decimal-leading-zero); position:absolute; left:14px; top:12px;
+    width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+    background:var(--latte); color:#fff; font-weight:900; font-size:.82rem; border:2px solid var(--outline-strong);
+  }
+  ol.steps b{color:var(--ink)}
+
+  /* ============ Media / figures ============ */
+  figure{margin:0; background:var(--panel); border:2px solid var(--outline); border-radius:var(--radius); overflow:hidden;
+    box-shadow:0 4px 0 rgba(96,74,53,.12), var(--shadow)}
+  .media{position:relative; background:#efe4d0; min-height:180px}
+  .media img{display:block; width:100%; height:auto}
+  .media .ph{display:none; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:220px; padding:20px; text-align:center}
+  .media.missing .ph{display:flex}
+  .media.missing img{display:none}
+  .ph .ic{font-size:2rem; color:var(--latte-deep)}
+  .ph .nm{font-family:ui-monospace,Menlo,monospace; font-size:.78rem; color:var(--ink-soft); word-break:break-all}
+  .ph .tp{font-size:.66rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--rose-deep);
+    background:#fdeef0; border:1.5px solid var(--outline); border-radius:999px; padding:4px 12px}
+  figcaption{padding:13px 16px}
+  figcaption b{display:block; font-size:.95rem}
+  figcaption span{font-size:.84rem; color:var(--muted); line-height:1.5; display:block; margin-top:3px}
+  figcaption .tagline{float:right; margin-top:2px}
+  .gallery{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+  .gal-group{margin:26px 0 10px; font-size:.76rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--rose-deep)}
+
+  /* video cards */
+  .vid{position:relative}
+  .vid video{display:block; width:100%; height:auto; background:#3d3227}
+  .rec{
+    position:absolute; top:12px; left:12px; z-index:2; display:inline-flex; gap:7px; align-items:center;
+    background:rgba(61,50,39,.85); color:#ffe6a1; font-size:.64rem; font-weight:900; letter-spacing:.12em;
+    text-transform:uppercase; padding:5px 12px; border-radius:999px; border:1.5px solid rgba(255,230,161,.5);
+  }
+  .rec i{width:8px;height:8px;border-radius:50%;background:#e35d6a; animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .vgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+  .vhero{margin-top:8px}
+
+  /* ============ Architecture diagram ============ */
+  .arch{display:grid; gap:12px}
+  .arch-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+  .node{
+    background:var(--panel); border:2px solid var(--outline-strong); border-radius:var(--radius-sm);
+    padding:13px 15px; text-align:center; box-shadow:0 3px 0 var(--outline-strong);
+  }
+  .node b{display:block; font-size:.92rem}
+  .node span{font-size:.76rem; color:var(--muted); font-weight:700}
+  .node.hot{background:#fdeef0} .node.calm{background:#eef4e6} .node.brain{background:#efe7fb} .node.warm{background:#fbeed3}
+  .flow{ text-align:center; color:var(--latte-deep); font-weight:900; font-size:1.15rem}
+  .loop-strip{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; padding:13px;
+    background:var(--panel2); border:2px dashed var(--outline); border-radius:var(--radius-sm); font-weight:800; font-size:.84rem; color:var(--ink-soft)}
+  .loop-strip em{font-style:normal; color:var(--latte-deep)}
+
+  /* ============ HUD mockup ============ */
+  .mock{background:var(--panel2); border:2px solid var(--outline); border-radius:var(--radius); padding:18px}
+  .mock-chip{display:inline-flex; gap:6px; align-items:center; background:var(--panel); border:2px solid var(--outline);
+    border-radius:999px; padding:8px 16px; font-weight:900; margin:0 8px 8px 0}
+  .mock-bar{height:11px; border-radius:99px; background:#eee3cf; border:1.5px solid var(--outline); overflow:hidden; margin:6px 0 14px}
+  .mock-bar i{display:block; height:100%; border-radius:99px}
+  .xp i{width:62%; background:linear-gradient(90deg,#f5c542,#f0a94e)}
+  .heat i{width:34%; background:linear-gradient(90deg,var(--matcha),var(--butter),var(--rose-deep))}
+  .mock-pop{display:inline-block; font-weight:900; font-size:.85rem; border:2px solid var(--outline-strong);
+    border-radius:999px; padding:3px 12px; margin-right:8px}
+  .pop-cash{background:#fdf3d8; color:#8a6a1d} .pop-xp{background:#efe7fb; color:var(--lavender-deep)}
+  .pop-lv{background:var(--matcha-deep); color:#fff}
+  .mock-grade{
+    display:inline-grid; place-items:center; width:74px; height:74px; border-radius:50%;
+    border:3px solid var(--matcha-deep); box-shadow:inset 0 0 0 3px var(--panel), inset 0 0 0 5px var(--matcha-deep);
+    color:var(--matcha-deep); font-size:1.9rem; font-weight:900; transform:rotate(8deg); background:var(--panel);
+  }
+  .mock-stars{font-size:1.5rem; color:#f5c542; -webkit-text-stroke:1.5px #5d4936; letter-spacing:2px}
+
+  /* file tree */
+  .tree{font-family:ui-monospace,Menlo,monospace; font-size:.84rem; line-height:1.85; color:var(--ink-soft);
+    background:var(--panel); border:2px solid var(--outline); border-radius:var(--radius-sm); padding:18px 22px}
+  .tree b{color:var(--latte-deep)}
+
+  /* iframe embed */
+  .embed{border:2px solid var(--outline-strong); border-radius:var(--radius); overflow:hidden; box-shadow:0 5px 0 var(--outline-strong)}
+  .embed iframe{display:block; width:100%; height:720px; border:0; background:#f6efe3}
+  .note{
+    display:flex; gap:10px; align-items:flex-start; background:#fbeed3; border:2px dashed var(--outline);
+    border-radius:var(--radius-sm); padding:13px 16px; font-size:.9rem; color:var(--ink-soft); font-weight:700;
+  }
+
+  footer{margin-top:70px; border-top:2px solid var(--outline); padding:30px 0 44px; text-align:center; color:var(--muted); font-weight:700; font-size:.88rem}
+  #top-btn{
+    position:fixed; right:20px; bottom:20px; z-index:110; width:50px; height:50px; border-radius:50%;
+    border:2px solid var(--outline-strong); background:var(--latte); color:#fff; font-size:1.2rem; font-weight:900;
+    cursor:pointer; box-shadow:0 3px 0 var(--outline-strong); opacity:0; pointer-events:none; transition:opacity .25s, transform .18s;
+  }
+  #top-btn.show{opacity:1; pointer-events:auto}
+  #top-btn:hover{transform:translateY(-3px)}
+
+  ul.tick{list-style:none; padding:0; margin:0; display:grid; gap:8px}
+  ul.tick li{padding-left:28px; position:relative; color:var(--ink-soft); line-height:1.55; font-weight:700; font-size:.92rem}
+  ul.tick li::before{content:"✓"; position:absolute; left:2px; color:var(--matcha-deep); font-weight:900}
+
+  @media (max-width:960px){
+    .hero-grid{grid-template-columns:1fr}
+    .g4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(2,1fr)}
+    .gallery,.vgrid{grid-template-columns:1fr}
+    .arch-row{grid-template-columns:1fr}
+    .hero h1{font-size:2.4rem}
+  }
+  @media (max-width:600px){
+    .g2,.g3,.g4{grid-template-columns:1fr}
+    section>.wrap>h2{font-size:1.6rem}
+    .embed iframe{height:520px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav aria-label="Report sections">
+  <div class="nav-inner">
+    <div class="brand"><span class="paw">🐾</span> BULLWHIP&nbsp;VILLAGE</div>
+    <div class="nav-links" id="nav-links">
+      <a href="#overview">OVERVIEW</a>
+      <a href="#how-to-play">HOW TO PLAY</a>
+      <a href="#beginner">BEGINNER</a>
+      <a href="#controls">CONTROLS</a>
+      <a href="#systems">SYSTEMS</a>
+      <a href="#learn-scm">LEARN SCM</a>
+      <a href="#city">CITY &amp; LEVELS</a>
+      <a href="#situations">SITUATIONS</a>
+      <a href="#hud">MAP / HUD</a>
+      <a href="#gallery">GALLERY</a>
+      <a href="#videos">VIDEOS</a>
+      <a href="#audio-lab">AUDIO LAB</a>
+      <a href="#play">PLAY LIVE</a>
+      <a href="#setup">DEV · SETUP</a>
+      <a href="#architecture">DEV · ARCHITECTURE</a>
+      <a href="#modules">DEV · MODULES</a>
+      <a href="#save">DEV · SAVE</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="kicker">☕ Cozy SCM City Sim · User Manual + Developer Report</div>
+      <h1>Purrfect Supply Chain:<br/>Bullwhip Village</h1>
+      <div class="ver">v1.0.0 · single-page report</div>
+      <p class="sub">Run a six-location cat-cafe supply-chain city, keep the <b>Bullwhip Effect</b> tame, and level every district — while tips, XP, and level-ups tick in live.</p>
+      <div class="techline">React 19 · Vite 6 · hand-drawn SVG · layered opening art · Web Audio (procedural) · 100% offline, zero backend</div>
+      <div class="chips">
+        <span class="chip c1">Real-time city ticks</span>
+        <span class="chip c2">Per-location levels 1→5</span>
+        <span class="chip c3">Weekly situations</span>
+        <span class="chip c4">Stars · Grades · 8 achievements</span>
+        <span class="chip c5">Bullwhip analytics</span>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="#how-to-play">🎮 Start Playing</a>
+        <a class="btn ghost" href="#setup">🛠 Developer View</a>
+        <a class="btn ghost" href="#videos">🎬 Watch Walkthrough</a>
+      </div>
+    </div>
+    <div>
+      <figure class="vid vhero">
+        <span class="rec"><i></i> LIVE GAMEPLAY CAPTURE</span>
+        <video controls preload="metadata" poster="assets/images/01_start_hero.png">
+          <source src="assets/videos/01_opening_intro.mp4" type="video/mp4" />
+        </video>
+        <figcaption><b>Opening intro clip</b><span>The living painted village: 38 active manifest layers with the flat reference image excluded. Camera sweep, depth travel, mouse + scroll parallax, and in-scene layer motion create the video-like opener. Silent screen capture — play the game live for the lo-fi soundtrack.</span></figcaption>
+      </figure>
+    </div>
+  </div>
+</header>
+
+<!-- ================= 01 OVERVIEW ================= -->
+<section id="overview">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 01 · PLAYER VIEW</span>
+    <h2>Overview</h2>
+    <p class="lead">You are the planner of Lavender Cat Village's supply chain. Each week you forecast demand, place an order upstream, and resolve a story dilemma — while the city earns tips and XP in real time between your decisions. Over-react to noisy demand and the <b>bullwhip</b> cracks: orders swing wider than demand, costs pile up, and the crew gets stressed.</p>
+    <div class="grid g4" style="margin-top:22px">
+      <div class="stat"><b>6</b><span>City locations, each with its own level</span></div>
+      <div class="stat"><b>5</b><span>Cat crew members with live moods</span></div>
+      <div class="stat"><b>8</b><span>Weekly narrative situations</span></div>
+      <div class="stat"><b>8</b><span>Unlockable achievements</span></div>
+      <div class="stat"><b>6</b><span>Rotating weekly goals</span></div>
+      <div class="stat"><b>7</b><span>Random market/logistics events</span></div>
+      <div class="stat"><b>12–24</b><span>Weeks per season (by difficulty)</span></div>
+      <div class="stat"><b>~2s</b><span>Real-time city tick — tips &amp; XP</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 HOW TO PLAY ================= -->
+<section id="how-to-play">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 02 · PLAYER VIEW</span>
+    <h2>How to Play</h2>
+    <div class="grid g2" style="align-items:start">
+      <ol class="steps">
+        <li><b>Launch the game.</b> Run the commands on the right, open the printed URL, and click <b>☕ Start Village Shift</b> (this also starts the music — turn sound on!).</li>
+        <li><b>Pick a difficulty.</b> Beginner (12 gentle weeks) → Very Analytical / Expert (24 noisy, tight-margin weeks).</li>
+        <li><b>Meet the crew.</b> Optionally rename Miso, Luna, Theo, Ivy &amp; Noah and re-tint their fur.</li>
+        <li><b>Watch the city live.</b> On the map, cafe tips (<b>+$</b>) and location <b>+XP</b> popups tick in every couple of seconds — before you decide anything.</li>
+        <li><b>Resolve the weekly Situation</b> on the Decision screen — a three-choice story dilemma with real simulation trade-offs.</li>
+        <li><b>Check the Weekly Goal</b> (e.g. “keep bullwhip under 1.8”) — hit it for a cash bonus.</li>
+        <li><b>Forecast &amp; order.</b> Enter forecast demand and order quantity (suggestions provided), pick one Village Action card, and <b>Confirm Week</b>.</li>
+        <li><b>Read the result:</b> star rating ⭐, letter grade (S–D) stamped on the panel, bonuses/penalties, situation outcome, and the crew's reactions.</li>
+        <li><b>Level your city.</b> Location Activities (+18 XP) and Field Commands (+14 XP) push districts toward Lv5 perks.</li>
+        <li><b>Finish the season</b> and collect your rank on the Final Report — then export CSV/HTML for analysis.</li>
+      </ol>
+      <div>
+        <pre><span class="c"># from the project root</span>
+npm install
+npm run dev
+<span class="c"># → open http://127.0.0.1:5199/</span>
+
+<span class="c"># production build + preview</span>
+npm run build
+npm run preview</pre>
+        <div class="note">🔊 <span>Browsers block autoplay: the lo-fi soundtrack and SFX begin on your <b>first click</b> (Start / difficulty). Two toggles top-right mute the 🎵 lo-fi music and 🔊 SFX <b>separately</b>; both choices are remembered.</span></div>
+        <div class="mock" style="margin-top:16px">
+          <b style="font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--rose-deep)">The core loop</b>
+          <div class="loop-strip" style="margin-top:10px">
+            <em>watch the city earn</em> → <em>decide the week</em> → <em>level locations</em> → <em>unlock perks &amp; badges</em> → <em>tame the bullwhip</em> → 🔁
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 BEGINNER GUIDE ================= -->
+<section id="beginner">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 03 · PLAYER VIEW</span>
+    <h2>Beginner Guide</h2>
+    <div class="grid g3">
+      <div class="card feature"><h3><span class="ic">⏱</span>First 5 minutes</h3><p>Start on <b>Beginner</b>. Stay on the Map for ~30s and just watch: tips at the cafe, XP popups, cats breathing. Click each location to read its status, then open the Decision tab.</p></div>
+      <div class="card feature"><h3><span class="ic">🎯</span>First objective</h3><p>Week 1: accept the <b>suggested forecast and order</b>, pick any Situation choice, keep <b>Steady Planner</b>, confirm. You'll almost certainly earn stars and the <b>First Profit</b> badge.</p></div>
+      <div class="card feature"><h3><span class="ic">💰</span>Core actions</h3><p>Your two numbers each week are <b>forecast</b> and <b>order</b>. Everything else — activities, commands, situations — bends risk around those two numbers.</p></div>
+      <div class="card feature"><h3><span class="ic">🆙</span>Unlocking</h3><p>Location levels unlock passively; nudge favorites with that location's <b>Activity</b> (+18 XP). Achievements unlock from play — <b>Friend of Bean</b> just needs a kind heart when the stray appears.</p></div>
+      <div class="card feature"><h3><span class="ic">🧭</span>When lost</h3><p>Read <b>Miso's note</b> (purple card, bottom of most panels) — the advisor cat comments on exactly what went wrong and suggests next week's number.</p></div>
+      <div class="card feature"><h3><span class="ic">⚡</span>Progress faster</h3><p>Chase the <b>Weekly Goal</b> every week and keep service ≥90% with bullwhip &lt;2 — the 🔥 streak bonus compounds, and stars fill the header counter.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 CONTROLS ================= -->
+<section id="controls">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 04 · PLAYER VIEW</span>
+    <h2>Controls</h2>
+    <p class="lead">Fully mouse-driven with keyboard support on the map. No gamepad, no reflexes required — it's a planning game.</p>
+    <div class="grid g2" style="align-items:start">
+      <table>
+        <thead><tr><th>Input</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><span class="key">Click</span></td><td>Select map locations, tabs, cards, choices; confirm the week; launch commands.</td></tr>
+          <tr><td><span class="key">Enter</span> / <span class="key">Space</span></td><td>Activate a focused map location (SVG nodes are real keyboard buttons).</td></tr>
+          <tr><td><span class="key">Type</span></td><td>Forecast &amp; order quantity number fields; crew name fields on setup.</td></tr>
+          <tr><td><span class="key">Hover</span></td><td>Tooltips on ? dots and chart data points; parallax on the start screen; card lift everywhere.</td></tr>
+          <tr><td><span class="key">🎵</span> / <span class="key">🔊</span></td><td>Two floating toggles (top-right): mute the lo-fi music and the sound effects <b>separately</b>; each persists between sessions.</td></tr>
+        </tbody>
+      </table>
+      <div class="grid g2">
+        <div class="card" style="text-align:center"><div style="font-size:1.8rem">🖱️</div><b>Mouse-first</b><p style="margin:6px 0 0;font-size:.85rem">Every decision is one or two clicks.</p></div>
+        <div class="card" style="text-align:center"><div style="font-size:1.8rem">⌨️</div><b>Map a11y</b><p style="margin:6px 0 0;font-size:.85rem">Tab to a district, Enter to open it.</p></div>
+        <div class="card" style="text-align:center"><div style="font-size:1.8rem">🖥️</div><b>Desktop-first</b><p style="margin:6px 0 0;font-size:.85rem">Designed for ≥1080px-wide windows.</p></div>
+        <div class="card" style="text-align:center"><div style="font-size:1.8rem">🐢</div><b>No time pressure</b><p style="margin:6px 0 0;font-size:.85rem">The real-time layer rewards you; it never punishes waiting.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 CORE SYSTEMS ================= -->
+<section id="systems">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 05 · PLAYER VIEW</span>
+    <h2>Core Systems</h2>
+    <div class="grid g3">
+      <div class="card feature"><h3><span class="ic">🌊</span>Bullwhip engine</h3><p>Every week the game computes <b>order variance ÷ demand variance</b>. Chase one demand spike with a giant order and the ratio — and your costs — amplify upstream. The whole game is built to make you feel this.</p></div>
+      <div class="card feature"><h3><span class="ic">⏱</span>Real-time city ticks</h3><p>Every ~2.1s: cafe tips (scaled by satisfaction) flow into cash, ambient events grant location XP, and floating popups rise off the map. Level-ups interrupt with fanfare + confetti.</p></div>
+      <div class="card feature"><h3><span class="ic">🆙</span>Location leveling</h3><p>Six districts, independent XP tracks (60→460 XP thresholds), Lv1→Lv5. Each level is a permanent perk: −3% purchase cost, −6% holding, +2% price, −5% noise, −6% delay, −5% bullwhip.</p></div>
+      <div class="card feature"><h3><span class="ic">📦</span>Pipeline &amp; lead time</h3><p>Orders arrive 1–7 weeks later depending on difficulty, route choice, supplier trust, heat, and luck. Count what's already in the pipeline before ordering more — or drown in holding cost.</p></div>
+      <div class="card feature"><h3><span class="ic">🎭</span>Weekly situations</h3><p>Eight narrative dilemmas (wedding orders, food critics, rival croissant carts, a stray cat named Bean) — three choices each, wired straight into the economy.</p></div>
+      <div class="card feature"><h3><span class="ic">🃏</span>Actions &amp; commands</h3><p>Five weekly action cards (Expedite Cart, Quality Tasting…) plus six per-district Field Commands (Harvest Surge, Route Reroute, Miso Control Room) for emergencies.</p></div>
+      <div class="card feature"><h3><span class="ic">⭐</span>Stars, grades, streaks</h3><p>Each week scores a 0–3⭐ rating and an S/A/B/C/D ink-stamp grade. Calm, high-service weeks chain into a 🔥 streak with escalating cash bonuses.</p></div>
+      <div class="card feature"><h3><span class="ic">🏆</span>Trophy case</h3><p>8 achievements from <i>First Profit</i> to <i>Whip Whisperer</i> (bullwhip &lt; 1.3) and <i>Friend of Bean</i>. Visible on Dashboard + Final Report.</p></div>
+      <div class="card feature"><h3><span class="ic">🎵</span>Procedural audio</h3><p>A synthesized lo-fi loop (Fmaj7–Am7–Dm7–G7) plus coins, stamps, alarms, fanfares and one very important <i>meow</i> — zero audio files shipped, with separate 🎵/🔊 mute toggles. Hear every cue in the <a href="#audio-lab">Audio Lab</a>.</p></div>
+      <div class="card feature"><h3><span class="ic">🌸</span>Cozy maximalism</h3><p>Nearly every element idles in motion: cards float on staggered phases, panels breathe, chips bob, badges rock, buttons sheen, petals and sparkles drift across the whole app — paused instantly on hover and disabled under reduced-motion.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 06 LEARN SCM ================= -->
+<section id="learn-scm">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 06 · PLAYER VIEW · FOR SCM PEOPLE</span>
+    <h2>How the Features Teach the Real Bullwhip Effect</h2>
+    <p class="lead">The Bullwhip Effect is the classic supply-chain failure mode: small wiggles in customer demand become huge, expensive swings in upstream orders. Every "fun" feature in this game is secretly one of its real causes or cures — the same dynamics taught with the MIT <b>Beer Game</b>, but with dopamine instead of worksheets.</p>
+    <table style="margin-top:20px">
+      <thead><tr><th>Game feature (the fun)</th><th>Real SCM concept (the lesson)</th><th>What you feel</th></tr></thead>
+      <tbody>
+        <tr><td><b>📈 Bullwhip ratio KPI + alert meter</b></td><td>Variance amplification: <code>Var(orders) / Var(demand)</code> — the textbook bullwhip measure (Lee, Padmanabhan &amp; Whang)</td><td>Panic-order after one spike and watch the ratio jump above 2 — then pay for it for weeks. The whip is <i>your own hand</i>.</td></tr>
+        <tr><td><b>📦 Shipment pipeline + lead times</b></td><td>Order-to-delivery delay — the #1 bullwhip driver in the Beer Game</td><td>Orders placed in week 3 land in week 6. Forget what's already in transit and you double-order; the game punishes it with holding cost.</td></tr>
+        <tr><td><b>🔮 Forecast input + smoothing suggestion</b></td><td>Demand-signal processing; exponential/weighted-average smoothing vs. naive reactive forecasting</td><td>Miso's suggested number is a weighted moving average. Chase last week's spike instead and your forecast error KPI exposes you.</td></tr>
+        <tr><td><b>🎭 Weekly Situations (promos, critics, weddings)</b></td><td>Demand shaping, price fluctuation &amp; order batching — Lee's classic bullwhip causes wrapped in story</td><td>A "Flash Bundle" promo feels great until the shelf empties — exactly how real promotions inject artificial demand variance.</td></tr>
+        <tr><td><b>🤝 Supplier trust &amp; route stability meters</b></td><td>Supply-side reliability: shortage gaming, rationing, and relationship capital</td><td>Panic orders and cheap contracts erode trust → delays rise → you order even more. The vicious cycle, felt as sad cat faces.</td></tr>
+        <tr><td><b>🆙 Location levels &amp; perks</b></td><td>Continuous-improvement investments: cheaper procurement, lower holding, calmer signals, faster routes</td><td>Leveling Analytics literally reduces bullwhip risk −5%/level — process maturity as a progression system.</td></tr>
+        <tr><td><b>🎯 Weekly goals + ⭐ stars + S–D grades</b></td><td>Balanced-scorecard KPIs: service level, forecast accuracy, inventory turns, cost control</td><td>You can't max profit by ignoring service — the balanced score forces the real multi-objective trade-off planners live with.</td></tr>
+        <tr><td><b>🔥 Stability streaks</b></td><td>The value of steady-state operations over heroics</td><td>The biggest bonuses come from being <i>boring</i> — the deepest SCM lesson in the game.</td></tr>
+        <tr><td><b>🚨 Field commands (Harvest Surge, Courier…)</b></td><td>Expediting &amp; emergency procurement — expensive, heat-raising last resorts</td><td>They work, once — then operations heat and cost teach you why firefighting isn't a strategy.</td></tr>
+        <tr><td><b>📊 Demand-vs-Orders chart</b></td><td>The bullwhip made visible: the purple order line swinging wider than the green demand line</td><td>One glance at the final-report chart shows a whole season of your over-reactions. It's the Beer Game debrief, automated.</td></tr>
+        <tr><td><b>📤 CSV / HTML export</b></td><td>Post-game analysis: full weekly ledger with variances, costs, service, and scores</td><td>Drop it in a spreadsheet, compute your own ratios, run a classroom debrief.</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:16px">🎓 <span><b>Classroom use:</b> run Beginner as a guided intro, Expert for a noisy-signal challenge. Compare exported CSVs across students — whoever kept order variance closest to demand variance internalized the lesson. The game never says "read this theory"; it makes you <i>pay cash</i> for every classic mistake.</span></div>
+  </div>
+</section>
+
+<!-- ================= 07 CITY & LEVELS ================= -->
+<section id="city">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 07 · PLAYER VIEW</span>
+    <h2>The City: Locations &amp; Levels</h2>
+    <table>
+      <thead><tr><th>Location</th><th>Keeper</th><th>Watches</th><th>Activity choices</th><th>Perk per level</th></tr></thead>
+      <tbody>
+        <tr><td><b>🌾 Supplier Farm</b></td><td>Luna</td><td>Supply reliability, trust</td><td>Cheap / Reliable / Flexible Batch</td><td>−3% purchase cost</td></tr>
+        <tr><td><b>📦 Warehouse</b></td><td>Theo</td><td>Inventory, holding cost</td><td>FIFO Focus / Safety Stock Wall / Fast Pick Zone</td><td>−6% holding cost</td></tr>
+        <tr><td><b>☕ Lavender Cafe</b></td><td>Ivy</td><td>Service level, promos</td><td>Calm Shelf / Flash Bundle / Premium Display</td><td>+2% selling price</td></tr>
+        <tr><td><b>🏘 Customer District</b></td><td>Ivy</td><td>Demand signals</td><td>Social Buzz / Preorders / Foot Traffic / Miso Signal</td><td>−5% demand noise</td></tr>
+        <tr><td><b>⚓ Port Hub</b></td><td>Noah</td><td>Lead time, routes</td><td>Fast Bridge / Safe Canal / Cheap Road / Courier</td><td>−6% delay risk</td></tr>
+        <tr><td><b>📈 Analytics Office</b></td><td>Miso</td><td>Bullwhip ratio</td><td>Smooth / Trend / Reactive / Manual forecast</td><td>−5% bullwhip risk</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px">XP thresholds per level: <b>60 → 150 → 280 → 460</b>. Sources: real-time ticks, that district's Activity (+18), its Field Command (+14), and weekly performance in its specialty (the Cafe levels from service %, Analytics from a tame ratio, the Port from on-time arrivals…).</p>
+  </div>
+</section>
+
+<!-- ================= 08 SITUATIONS ================= -->
+<section id="situations">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 08 · PLAYER VIEW</span>
+    <h2>Weekly Situations, Goals &amp; Events</h2>
+    <div class="grid g3">
+      <div class="card"><h3>🎭 8 Situations</h3><p style="font-size:.9rem">A Wedding Preorder · The Food Critic · Luna's Surplus Harvest · A Tired Crew · The New Bakery · Bridge Maintenance · The Stray by the Door (Bean!) · Night Market Invitation. Three trade-off choices each; the outcome is narrated in your weekly result.</p></div>
+      <div class="card"><h3>🎯 6 Weekly Goals</h3><p style="font-size:.9rem">Service Star (≥92%) · Sharp Forecast (≤12% error) · Calm Orders · Lean Shelves · Profitable Week · Whip Tamer (&lt;1.8). Rewards $200–$300 each.</p></div>
+      <div class="card"><h3>🎲 7 Random Events</h3><p style="font-size:.9rem">Mooncake Festival Rush · Supplier Farm Delay · Rainy Route Disruption · Lavender Pastry Trend · Quality Check · Cat Parade Weekend · Calm Misty Morning.</p></div>
+    </div>
+    <p style="margin-top:14px">Long-run behavior also steers one of four <b>story branches</b> — Stable Planner, Chaotic Growth, Trust Crisis, Emergency Recovery — which colors the flavor text and your <b>final rank</b> (from <i>Crisis Recovery Trainee</i> up to <i>Lavender Legend</i>).</p>
+  </div>
+</section>
+
+<!-- ================= 09 MAP / UI / HUD ================= -->
+<section id="hud">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 09 · PLAYER VIEW</span>
+    <h2>Map, UI &amp; HUD</h2>
+    <p class="lead">Everything below is a faithful inline mockup of in-game UI (it renders pixel-perfect here even where screenshots can't capture hover states).</p>
+    <div class="grid g2">
+      <div class="mock">
+        <b style="font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--rose-deep)">Header HUD</b><br/><br/>
+        <span class="mock-chip">💰 $8,521</span>
+        <span class="mock-chip" style="background:#fbeed3;color:var(--butter-deep)">🔥 ×3</span>
+        <span class="mock-chip" style="background:#fdf3d8;color:#b3872c">⭐ 13</span>
+        <p style="font-size:.85rem;margin:8px 0 4px"><b>Cash</b> counts up live as tips land · <b>🔥 streak</b> glows while service ≥90% and bullwhip &lt;2 · <b>⭐</b> total stars this season.</p>
+        <b style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Operations heat</b>
+        <div class="mock-bar heat"><i></i></div>
+        <b style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">Location XP (Cafe · Lv2)</b>
+        <div class="mock-bar xp"><i></i></div>
+      </div>
+      <div class="mock">
+        <b style="font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--rose-deep)">Live map popups &amp; weekly rating</b><br/><br/>
+        <span class="mock-pop pop-cash">+$6</span>
+        <span class="mock-pop pop-xp">+4 XP</span>
+        <span class="mock-pop pop-lv">Cafe reached Lv2!</span>
+        <p style="font-size:.85rem;margin:10px 0 14px">Popups float up from the district that earned them, every ~2s. Level-ups get fanfare + confetti.</p>
+        <div style="display:flex;gap:20px;align-items:center">
+          <span class="mock-grade">A</span>
+          <div><div class="mock-stars">★★★</div><span style="font-size:.82rem;color:var(--muted);font-weight:800">Week grade stamp + star rating on every Weekly Result</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:30px">Every element on the Map screen</h3>
+    <table>
+      <thead><tr><th>Element</th><th>Where</th><th>What it tells you / does</th><th>Motion</th></tr></thead>
+      <tbody>
+        <tr><td><b>Location node</b></td><td>6 circles on the map</td><td>Click (or Tab+Enter) to select a district; ring turns latte-brown when selected</td><td>Springy hover-scale; pulses red when critical</td></tr>
+        <tr><td><b>Status sticker</b></td><td>Pill above each node</td><td>Live state: READY / TRUST / LOW STOCK / SOLD OUT / ANGRY / BLOCKED / BULLWHIP / SMOOTH</td><td>Recolors by severity (cream→amber→red)</td></tr>
+        <tr><td><b>Level badge</b></td><td>Gold L1–L5 coin on each node</td><td>That district's current level</td><td>Updates live as XP lands</td></tr>
+        <tr><td><b>Floating popups</b></td><td>Rise off nodes every ~2s</td><td>Gold <b>+$</b> tips (cafe), purple <b>+XP</b>, green <b>Lv-up!</b> banners</td><td>Float-up-and-fade; level-ups bounce</td></tr>
+        <tr><td><b>Command beacons</b></td><td>Rings around key nodes</td><td>Hint that Field Commands are available; turn red under high operations heat</td><td>Expanding sonar rings</td></tr>
+        <tr><td><b>Delivery cart &amp; boat</b></td><td>Road / canal paths</td><td>Cart speed reflects current lead time; boat = port traffic</td><td>Continuous path animation</td></tr>
+        <tr><td><b>Demand bubbles</b></td><td>Customer District</td><td>Numbers scale with last week's actual demand</td><td>Bobbing float</td></tr>
+        <tr><td><b>Ambient scenery</b></td><td>Everywhere</td><td>Clouds, birds, cafe steam, water waves, string lights, falling petals — the cozy-maximalism layer</td><td>All independently looping</td></tr>
+        <tr><td><b>Crew strip</b></td><td>Below the map</td><td>All five cats with live mood labels (cheerful / focused / worried / crisis)</td><td>Breathing, blinking, ear twitches; crisis cats wobble</td></tr>
+        <tr><td><b>Ops board</b></td><td>Bottom of map panel</td><td>Customer queue · crates in motion · shelf pressure · bullwhip watch</td><td>Sweeping progress bars, faster when critical</td></tr>
+        <tr><td><b>Location panel</b></td><td>Right sidebar</td><td>Selected district: level + XP bar + perk, map sticker, status, KPI, assigned cat, note, actions</td><td>XP bar shimmers; cat avatar animates</td></tr>
+        <tr><td><b>Field command card</b></td><td>Sidebar bottom</td><td>That district's emergency move with cost (e.g. Harvest Surge · $650)</td><td>Launch = whoosh SFX + log entry</td></tr>
+        <tr><td><b>Miso note + command feed</b></td><td>Sidebar bottom</td><td>Advisor guidance and a rolling event log</td><td>New entries fade in</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:26px">Persistent HUD &amp; overlays (every screen)</h3>
+    <table>
+      <thead><tr><th>Element</th><th>What it shows</th><th>Motion / feedback</th></tr></thead>
+      <tbody>
+        <tr><td><b>💰 Cash chip</b></td><td>Village cash — animates while real-time tips land</td><td>Count-up easing, gentle bob</td></tr>
+        <tr><td><b>🔥 Streak chip</b></td><td>Appears at streak ≥1; stability streak multiplier</td><td>Warm glow pulse, scales with pride</td></tr>
+        <tr><td><b>⭐ Star chip</b></td><td>Total weekly stars this season</td><td>Count-up on each result</td></tr>
+        <tr><td><b>Week meter</b></td><td>Season progress bar</td><td>Fills with a moving shine sweep</td></tr>
+        <tr><td><b>Tab bar</b></td><td>Map · Decision · Weekly Result · Dashboard · Final Report (locked till season end)</td><td>Active pill glows; disabled tabs dimmed</td></tr>
+        <tr><td><b>Live ticker</b></td><td>Scrolling: customers asking · transport · service · story event</td><td>Endless marquee + pulsing green dot</td></tr>
+        <tr><td><b>Chain strip &amp; heat bar</b></td><td>Supplier→Warehouse→Cafe→Customers flow; operations heat 0–100</td><td>Flowing route segments; heat gradient shimmers green→amber→rose</td></tr>
+        <tr><td><b>🎵 / 🔊 toggles</b></td><td>Separate lo-fi music and SFX mutes, each persisted</td><td>Bob alternately; struck-through when off</td></tr>
+        <tr><td><b>Toasts</b></td><td>Goal results, streaks, achievements, level-ups</td><td>Pop from bottom, auto-dismiss ~3.4s</td></tr>
+        <tr><td><b>Confetti</b></td><td>Great weeks, level-ups, season finale (big burst)</td><td>Full-screen falling pieces in the game palette</td></tr>
+        <tr><td><b>Grade stamp + star row</b></td><td>Weekly Result: rotated S–D ink stamp, 0–3 stars</td><td>Stamp slams in; stars pop sequentially</td></tr>
+        <tr><td><b>Warning stamps</b></td><td>Decision screen: over-order / heavy pipeline / risky promo alerts</td><td>Pop-in pills — the game warns before you whip</td></tr>
+        <tr><td><b>Activity modal</b></td><td>Per-district strategy choices with the keeper cat's dialogue</td><td>Springs open; choice cards lift; close button spins</td></tr>
+        <tr><td><b>Layered opening scene</b></td><td>Full-screen painted village assembled from 38 active alpha-matted layers from the manifest; the flat full-reference image is excluded. Clouds, water, foliage, buildings, boats, truck, forklift, dock worker, cafe cats, crates, awnings, and lights move as one cinematic diorama.</td><td>Camera pull/sweep, mouse + scroll parallax, depth travel, per-layer bob/sway/drift, sun-wash shimmer</td></tr>
+        <tr><td><b>Ambient life layer</b></td><td>Petals, sparkles, leaves, coffee cups drifting across the whole app</td><td>Perpetual rise-and-spin; disabled under <code>prefers-reduced-motion</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 10 GALLERY ================= -->
+<section id="gallery">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 10 · MEDIA</span>
+    <h2>Screenshot Gallery</h2>
+    <p class="lead">Real captures from a scripted 16-week season (Medium difficulty, headless Chromium, 1600×1000).</p>
+    <div id="gal-onboard"></div>
+    <div id="gal-play"></div>
+    <div id="gal-analytics"></div>
+  </div>
+</section>
+
+<!-- ================= 11 VIDEOS ================= -->
+<section id="videos">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 11 · MEDIA</span>
+    <h2>Video Walkthroughs</h2>
+    <figure class="vid vhero">
+      <span class="rec"><i></i> REC · CLIP TO RECORD</span>
+      <video controls preload="metadata" poster="assets/images/03_city_map_live.png">
+        <source src="assets/videos/02_full_walkthrough.mp4" type="video/mp4" />
+      </video>
+      <figcaption><b>🎬 Full Gameplay Walkthrough</b><span>A complete recorded season: difficulty pick → crew setup → live city map → location activity → weekly decision with Situation &amp; Goal → confirm celebration → dashboard analytics → all 16 weeks → final report and exports. Silent screen capture (play the game live for the lo-fi soundtrack + SFX) — the flagship clip for gamers, SCM folks, and devs alike.</span></figcaption>
+    </figure>
+    <div class="vgrid" id="vid-grid" style="margin-top:18px"></div>
+  </div>
+</section>
+
+<!-- ================= 12 AUDIO LAB ================= -->
+<section id="audio-lab">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 12 · MEDIA · INTERACTIVE</span>
+    <h2>Audio Lab — Play Every Game Sound</h2>
+    <p class="lead">Nothing here is a recording. The game synthesizes every note with the <b>Web Audio API</b> — and this section runs the <i>exact same synth code</i>, live in your browser. Press play to hear each cue exactly as it sounds in-game. Music (🎵) and SFX (🔊) have separate in-game mute toggles.</p>
+    <div class="grid g3" id="audio-grid" style="margin-top:20px"></div>
+    <div class="note" style="margin-top:16px">🎧 <span>The lo-fi loop is a Fmaj7 → Am7 → Dm7 → G7 progression: warm sine pads, a humanized triangle arpeggio (notes randomly skipped for feel), and a soft bass pluck on beats 1 and 3 — one 3.6-second bar per chord, forever. The preview button plays two bars.</span></div>
+  </div>
+</section>
+
+<!-- ================= 13 PLAY LIVE ================= -->
+<section id="play">
+  <div class="wrap">
+    <span class="sec-kicker">SECTION 13 · PLAY</span>
+    <h2>Play It Live</h2>
+    <div class="note" style="margin-bottom:16px">🖥 <span>This embed needs the dev server: run <code>npm run dev</code> in the project root, then open this report over the same machine. Opening this file via <code>file://</code> still works — the frame will just show a connection note. Sound requires one click inside the frame.</span></div>
+    <div class="embed"><iframe src="http://127.0.0.1:5199" title="Purrfect Supply Chain: Bullwhip Village — live game" loading="lazy"></iframe></div>
+  </div>
+</section>
+
+<!-- ================= 14 DEV SETUP ================= -->
+<section id="setup">
+  <div class="wrap">
+    <span class="sec-kicker dev">SECTION 14 · DEVELOPER VIEW</span>
+    <h2>Setup &amp; Runtime</h2>
+    <div class="grid g2" style="align-items:start">
+      <table>
+        <thead><tr><th>Layer</th><th>Choice</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><b>UI</b></td><td>React 19</td><td>Hooks drive the real-time tick; StrictMode on.</td></tr>
+          <tr><td><b>Build</b></td><td>Vite 6</td><td>Dev on <code>127.0.0.1:5199</code> (strict port via <code>.claude/launch.json</code>).</td></tr>
+          <tr><td><b>Language</b></td><td>JavaScript + JSX</td><td>No TypeScript; 7 source files, ~10,400 lines.</td></tr>
+          <tr><td><b>Styling</b></td><td>Plain CSS (~4,900 lines)</td><td>Full design system, cinematic opener, and animation system; no utility framework.</td></tr>
+          <tr><td><b>Graphics</b></td><td>Inline SVG + layered PNG opening art</td><td>Map, cats, and charts are hand-authored SVG; the opening is a manifest-driven stack of active PNG layers.</td></tr>
+          <tr><td><b>Audio</b></td><td>Web Audio API</td><td>Procedural music + 11 SFX; zero audio assets.</td></tr>
+          <tr><td><b>Persistence</b></td><td>localStorage</td><td>Mute flag only (see Save System).</td></tr>
+          <tr><td><b>Bundle</b></td><td>~95 kB JS + ~9 kB CSS (gz)</td><td>Static-host deployable from <code>dist/</code>.</td></tr>
+        </tbody>
+      </table>
+      <div>
+        <pre><span class="c"># develop</span>
+npm install
+npm run dev          <span class="c"># http://127.0.0.1:5199</span>
+
+<span class="c"># ship</span>
+npm run build        <span class="c"># → dist/</span>
+npm run preview      <span class="c"># serve dist locally</span>
+
+<span class="c"># regenerate report screenshots (scratch tooling)</span>
+<span class="c"># headless playwright script drives a full season</span>
+<span class="c"># and writes docs/report/assets/images/*.png</span></pre>
+        <div class="note">📦 <span>Only runtime dependencies are <b>react</b> and <b>react-dom</b>. Vite and the React plugin are the entire toolchain.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 15 ARCHITECTURE ================= -->
+<section id="architecture">
+  <div class="wrap">
+    <span class="sec-kicker dev">SECTION 15 · DEVELOPER VIEW</span>
+    <h2>Architecture</h2>
+    <p class="lead">The defining decision is the <b>dual-clock model</b>: a deliberate, turn-based weekly resolver layered under a passive real-time dopamine engine — both producing immutable state snapshots consumed by the same React tree.</p>
+    <div class="arch" style="margin-top:18px">
+      <div class="arch-row">
+        <div class="node"><b>main.jsx</b><span>mounts &lt;App/&gt; + styles.css</span></div>
+        <div class="node brain"><b>gameContent.js</b><span>characters · activities · situations · story text</span></div>
+        <div class="node warm"><b>audio.js / juice.jsx</b><span>SFX &amp; music · confetti · count-ups · toasts</span></div>
+      </div>
+      <div class="flow">▼ imports ▼</div>
+      <div class="arch-row">
+        <div class="node hot"><b>App.jsx — phase machine</b><span>start → setup → game (Map / Decision / Result / Dashboard / Final)</span></div>
+        <div class="node calm"><b>simulation.js — weekly clock</b><span>simulateWeek(state, decision) → new state (economy, bullwhip, XP, achievements)</span></div>
+        <div class="node calm"><b>simulation.js — real-time clock</b><span>cityTick(state) every ~2.1s → new state + popup events</span></div>
+      </div>
+      <div class="flow">▼ state → render ▼</div>
+      <div class="loop-strip">
+        <em>UI event / interval</em> → <em>pure state fn</em> → <em>setGame(next)</em> → <em>React re-render</em> → <em>SVG map · charts · cats · popups</em> → <em>sfx + confetti side-effects</em>
+      </div>
+    </div>
+    <h3 style="margin-top:26px">Weekly resolution pipeline (<code>simulateWeek</code>)</h3>
+    <ol class="steps">
+      <li><b>Merge modifiers:</b> activity effects + situation choice + location-level perks fold into one multiplier set.</li>
+      <li><b>Roll event → compute demand:</b> base + trend + damped noise × event multiplier.</li>
+      <li><b>Advance pipeline:</b> arrivals, quality loss, emergency procurement, fulfillment, stockouts.</li>
+      <li><b>Cost stack:</b> purchase, holding, stockout, ordering, disruption, action, emergency, situation cash.</li>
+      <li><b>KPIs:</b> service level, forecast error, demand/order variance → <b>bullwhip ratio</b>.</li>
+      <li><b>Meters &amp; heat:</b> supplier trust, reputations, patience, route stability, operations heat.</li>
+      <li><b>Rewards:</b> bonuses/penalties, weekly goal, streak, stars ⭐ + S–D grade, per-location XP, achievements, story branch, Miso advice.</li>
+    </ol>
+    <div class="note" style="margin-top:14px">🧠 <span><b>Gotcha:</b> the tick interval reads game state through a <code>gameRef</code> (a ref mirroring the latest state) so the <code>setInterval</code> never closes over stale state and never needs re-creating — the classic React stale-closure trap, avoided.</span></div>
+  </div>
+</section>
+
+<!-- ================= 16 MODULES ================= -->
+<section id="modules">
+  <div class="wrap">
+    <span class="sec-kicker dev">SECTION 16 · DEVELOPER VIEW</span>
+    <h2>Project Structure &amp; Modules</h2>
+    <div class="grid g2" style="align-items:start">
+      <div class="tree">cozy-cat-scm-bull-game/
+├── index.html            <b># Vite entry</b>
+├── package.json
+├── .claude/launch.json   <b># dev server, port 5199</b>
+├── docs/
+│   ├── PROJECT_REPORT.md
+│   ├── USER_MANUAL.md
+│   └── report/           <b># ← this page + assets</b>
+│       └── assets/{images,videos}/
+├── dist/                 <b># build output</b>
+└── src/
+    ├── main.jsx          <b>#  10 lines</b>
+    ├── App.jsx           <b>#  ~2,580 · UI + screens</b>
+    ├── simulation.js     <b>#  ~1,730 · engine</b>
+    ├── gameContent.js    <b>#    ~690 · content</b>
+    ├── audio.js          <b>#    ~170 · synth</b>
+    ├── juice.jsx         <b>#    ~110 · FX</b>
+    └── styles.css        <b>#  ~4,890 · design system + cinematic motion</b></div>
+      <table>
+        <thead><tr><th>Module</th><th>Responsibility</th><th>Key exports</th></tr></thead>
+        <tbody>
+          <tr><td><b>App.jsx</b></td><td>Phase machine, tick interval, all ~45 components: screens, SVG map, CatFace, city scenes, LineChart.</td><td><code>App</code> (default)</td></tr>
+          <tr><td><b>simulation.js</b></td><td>Pure game logic: difficulties, weekly resolver, real-time tick, XP/leveling, scoring, achievements, CSV/HTML export.</td><td><code>simulateWeek</code>, <code>cityTick</code>, <code>grantXp</code>, <code>ACHIEVEMENTS</code>, <code>summarizeGame</code></td></tr>
+          <tr><td><b>gameContent.js</b></td><td>Declarative content tables — no logic.</td><td><code>SITUATIONS</code>, <code>LOCATION_ACTIVITIES</code>, <code>CHARACTER_PROFILES</code></td></tr>
+          <tr><td><b>audio.js</b></td><td>Oscillator/noise synth, SFX map, looping chord progression, persisted mute.</td><td><code>sfx</code>, <code>startMusic</code>, <code>toggleMute</code></td></tr>
+          <tr><td><b>juice.jsx</b></td><td>Reusable feel components.</td><td><code>ConfettiBurst</code>, <code>CountUp</code>, <code>FloatingPetals</code>, <code>Toast</code></td></tr>
+          <tr><td><b>styles.css</b></td><td>Tokens, ink outlines, grain/dot textures, every keyframe; <code>prefers-reduced-motion</code> safe.</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 17 SAVE ================= -->
+<section id="save">
+  <div class="wrap">
+    <span class="sec-kicker dev">SECTION 17 · DEVELOPER VIEW</span>
+    <h2>Save System</h2>
+    <div class="grid g2">
+      <table>
+        <thead><tr><th>Data</th><th>Where</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><b>Mute preference</b></td><td><code>localStorage["bullwhip-muted"]</code></td><td>Audio choice should survive reloads; read at synth init, written on toggle.</td></tr>
+          <tr><td><b>Season state</b></td><td>In-memory React state only</td><td>A season is a 15–45 min sitting; a refresh restarts it. Deliberate v1 scope — see Future Work.</td></tr>
+          <tr><td><b>Exports</b></td><td>User-downloaded CSV / HTML</td><td>Full weekly ledger for spreadsheets or class debriefs — the "permanent record" of a run.</td></tr>
+        </tbody>
+      </table>
+      <div class="note">💾 <span>The full game state is one serializable object (<code>initialState()</code> → mutations only via pure functions), so adding <code>localStorage</code> season persistence is a ~20-line change: serialize on <code>setGame</code>, hydrate on boot, version-stamp the schema. Highest-value future item.</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    🐾 Purrfect Supply Chain: Bullwhip Village v1.0.0 · User + Developer Report · React 19 · Vite 6 · hand-drawn SVG + layered opening art · Web Audio<br/>
+    Made for gamers, supply-chain people, and the devs who ship for both.
+  </div>
+</footer>
+
+<button id="top-btn" aria-label="Back to top" title="Back to top">↑</button>
+
+<script>
+/* ---------- reusable render helpers ---------- */
+function fig(file, title, caption, tag){
+  const t = tag ? '<span class="tagline '+(tag==="Developer View"?"tag-dev":"tag-user")+'">'+tag+'</span>' : "";
+  return '<figure>'+
+    '<div class="media">'+
+      '<img loading="lazy" src="assets/images/'+file+'" alt="'+title+'" '+
+        'onerror="this.closest(\'.media\').classList.add(\'missing\')">'+
+      '<div class="ph"><span class="ic">▦</span>'+
+        '<span class="nm">assets/images/'+file+'</span>'+
+        '<span class="tp">screenshot to record</span></div>'+
+    '</div>'+
+    '<figcaption>'+t+'<b>'+title+'</b><span>'+caption+'</span></figcaption>'+
+  '</figure>';
+}
+function clip(src, poster, title, caption){
+  return '<figure class="vid">'+
+    '<span class="rec"><i></i> LIVE GAMEPLAY CAPTURE</span>'+
+    '<video controls preload="metadata" poster="assets/images/'+poster+'">'+
+      '<source src="assets/videos/'+src+'" type="video/mp4" /></video>'+
+    '<figcaption><b>'+title+'</b><span>'+caption+'</span></figcaption>'+
+  '</figure>';
+}
+function group(label, figs){
+  return '<div class="gal-group">'+label+'</div><div class="gallery">'+figs.join("")+'</div>';
+}
+
+/* ---------- gallery data ---------- */
+const onboard = [
+  fig("01_start_hero.png","Opening — the living painted village","A full-screen illustrated village built from 38 active alpha-matted layers: cafe cats, dock workers, drifting clouds, bobbing boats, warehouse activity, water, foliage, and lights. The flat reference image is excluded; the video-like feeling comes from camera motion, depth travel, mouse + scroll parallax, and real layer animation.","User View"),
+  fig("02_character_setup.png","Meet the Village Team","Five outlined vector cats — Miso, Luna, Theo, Ivy, Noah — blinking and tail-swishing; rename them and re-tint their fur.","User View"),
+];
+const play = [
+  fig("03_city_map_live.png","Live city map (Week 1)","L1 badges on all six districts, the Analytics XP panel (0/60 XP, −5% bullwhip perk), cash already up to $7,813 from idle tips.","User View"),
+  fig("04_location_activity.png","Location Activity — Forecasting Challenge","Miso's four forecast disciplines (Smooth / Trend / Reactive / Manual) as outlined choice cards; +18 XP to Analytics on apply.","User View"),
+  fig("05_decision_screen.png","Weekly Decision","Weekly Goal card, the Situation dilemma with a choice selected, forecast + order inputs with suggestions, five action cards.","User View"),
+  fig("06_weekly_result.png","Weekly Result","Letter-grade ink stamp + 0–3⭐ pop-in, goal banner, bonus pills, situation outcome narration, crew mood cards.","User View"),
+];
+const analytics = [
+  fig("07_dashboard_analytics.png","SCM Dashboard","Reputation meters, 16 KPI cards, six animated SVG charts (Demand vs Orders, Bullwhip trend…), Trophy Case progress.","User View"),
+  fig("08_final_report.png","Final Report — real 16-week season","Rank “Festival Survivor”, $9,038 cash, 13⭐, branch “Chaotic Growth Path”, 6/8 achievements, full-season demand-vs-orders chart showing the bullwhip.","Developer View"),
+];
+document.getElementById("gal-onboard").innerHTML  = group("Onboarding", onboard);
+document.getElementById("gal-play").innerHTML     = group("Core play", play);
+document.getElementById("gal-analytics").innerHTML= group("Analytics & season end", analytics);
+
+/* ---------- video grid ---------- */
+document.getElementById("vid-grid").innerHTML = [
+  clip("01_opening_intro.mp4","01_start_hero.png","Opening intro","Cinematic camera pull, layered parallax, drifting clouds, bobbing boats, cafe service, warehouse motion, and twinkling in-scene lights. Silent capture."),
+  clip("03_live_city_ticks.mp4","03_city_map_live.png","Real-time city ticks","45 idle seconds: tips landing, XP popups, cash counting up, maybe a level-up."),
+  clip("04_week_confirm.mp4","06_weekly_result.png","Week confirm celebration","Fanfare → grade stamp slam → star pops → goal toast, in one take."),
+  clip("05_levelup_and_trophies.mp4","07_dashboard_analytics.png","Level-ups & trophy case","A district hits a new level, then a scroll through unlocked badges."),
+].join("");
+
+/* ---------- Audio Lab: the game's actual Web Audio synth, inlined ---------- */
+let actx=null;
+function ac(){ if(actx) return actx; const A=window.AudioContext||window.webkitAudioContext; actx=new A(); return actx; }
+function tone({freq=440,type="sine",dur=.2,gain=.3,when=0,glide=0}){
+  const c=ac(),t0=c.currentTime+when,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,t0);
+  if(glide)o.frequency.exponentialRampToValueAtTime(Math.max(30,freq+glide),t0+dur);
+  g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(gain,t0+.015);
+  g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+dur+.05);
+}
+function noise({dur=.15,gain=.2,when=0,filterFreq=1800}){
+  const c=ac(),t0=c.currentTime+when,b=c.createBuffer(1,c.sampleRate*dur,c.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);
+  const s=c.createBufferSource();s.buffer=b;
+  const f=c.createBiquadFilter();f.type="lowpass";f.frequency.value=filterFreq;
+  const g=c.createGain();g.gain.setValueAtTime(gain,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  s.connect(f);f.connect(g);g.connect(c.destination);s.start(t0);
+}
+const CHORDS=[[174.61,220,261.63,329.63],[220,261.63,329.63,392],[146.83,220,261.63,349.23],[196,246.94,293.66,392]];
+function playBar(i,when=0){
+  const ch=CHORDS[i%4];
+  ch.forEach(f=>{tone({freq:f,type:"sine",dur:3.6,gain:.05,when});tone({freq:f*2,type:"sine",dur:3.4,gain:.018,when});});
+  [...ch.map(f=>f*2),ch[2]*2,ch[1]*2].forEach((f,j)=>{if(Math.random()<.22)return;
+    tone({freq:f,type:"triangle",dur:.5,gain:.04,when:when+.2+j*.55});});
+  tone({freq:ch[0]/2,type:"sine",dur:.8,gain:.08,when});
+  tone({freq:ch[0]/2,type:"sine",dur:.8,gain:.06,when:when+1.8});
+}
+const AUDIO_LAB=[
+  ["🎵","Lo-fi cafe loop","Plays continuously in the background (own mute toggle). Preview: two bars, Fmaj7 → Am7.",
+    ()=>{playBar(0,0);playBar(1,3.6);}],
+  ["🐾","Meow","Greets you when you press Start Village Shift — the game's hello.",
+    ()=>{tone({freq:660,type:"sawtooth",dur:.28,gain:.08,glide:240});tone({freq:662,type:"triangle",dur:.28,gain:.12,glide:230});}],
+  ["🖱","Click","Every tab switch and small button press.",
+    ()=>tone({freq:620,type:"triangle",dur:.08,gain:.18})],
+  ["🃏","Select","Choosing a map location, action card, or situation choice.",
+    ()=>{tone({freq:520,type:"triangle",dur:.09,gain:.2});tone({freq:780,type:"triangle",dur:.12,gain:.16,when:.06});}],
+  ["✅","Confirm","Confirming the weekly decision — a rising four-note arpeggio.",
+    ()=>[523,659,784,1047].forEach((f,i)=>tone({freq:f,type:"triangle",dur:.22,gain:.2,when:i*.08}))],
+  ["💰","Coin","Quiet good weeks, and every ~4th real-time cafe tip.",
+    ()=>{tone({freq:988,type:"square",dur:.07,gain:.1});tone({freq:1319,type:"square",dur:.18,gain:.1,when:.07});}],
+  ["📌","Stamp","Applying a Location Activity — thump of ink on paper.",
+    ()=>{noise({dur:.12,gain:.4,filterFreq:900});tone({freq:130,type:"sine",dur:.14,gain:.35});}],
+  ["⚠️","Warning","Risky decision warnings (over-order, low stock promos).",
+    ()=>{tone({freq:330,type:"sawtooth",dur:.16,gain:.12});tone({freq:262,type:"sawtooth",dur:.24,gain:.12,when:.14});}],
+  ["🚨","Crisis","A week with angry customers, route shutdowns, or bullwhip alarms.",
+    ()=>[330,262,208].forEach((f,i)=>tone({freq:f,type:"sawtooth",dur:.2,gain:.13,when:i*.13}))],
+  ["💨","Whoosh","Launching a Field Command (Harvest Surge, Route Reroute…).",
+    ()=>noise({dur:.28,gain:.22,filterFreq:2600})],
+  ["🎯","Goal chime","Weekly goal complete, achievement unlocked, location level-up.",
+    ()=>[784,988,1175].forEach((f,i)=>tone({freq:f,type:"triangle",dur:.2,gain:.18,when:i*.09}))],
+  ["🏆","Fanfare","The season finale — Final Report reveal with confetti.",
+    ()=>{[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone({freq:f,type:"triangle",dur:.3,gain:.2,when:i*.12}));
+      [262,330,392].forEach((f,i)=>tone({freq:f,type:"sine",dur:.9,gain:.12,when:.36+i*.02}));}]
+];
+document.getElementById("audio-grid").innerHTML=AUDIO_LAB.map(([ic,name,situ],i)=>
+  '<div class="card audio-card"><h3><span class="ic">'+ic+'</span>'+name+'</h3>'+
+  '<p style="font-size:.88rem;min-height:52px">'+situ+'</p>'+
+  '<button class="btn primary audio-play" data-i="'+i+'" style="min-height:40px;padding:8px 20px">▶ Play</button></div>'
+).join("");
+document.querySelectorAll(".audio-play").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    if(ac().state==="suspended")ac().resume();
+    AUDIO_LAB[+btn.dataset.i][3]();
+    btn.textContent="♪ Playing…";
+    setTimeout(()=>{btn.textContent="▶ Play";}, +btn.dataset.i===0?7400:1400);
+  });
+});
+
+/* ---------- active-nav highlight ---------- */
+const links = [...document.querySelectorAll("#nav-links a")];
+const byId = Object.fromEntries(links.map(a => [a.getAttribute("href").slice(1), a]));
+const obs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove("active"));
+      const link = byId[e.target.id];
+      if(link){ link.classList.add("active");
+        link.scrollIntoView({block:"nearest", inline:"center", behavior:"smooth"}); }
+    }
+  });
+},{rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll("section[id]").forEach(s=>obs.observe(s));
+
+/* ---------- back to top ---------- */
+const topBtn = document.getElementById("top-btn");
+addEventListener("scroll",()=>topBtn.classList.toggle("show", scrollY>600));
+topBtn.addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
+
+/* ---------- autoplay-muted-on-view for videos (optional, guarded) ---------- */
+const vObs = new IntersectionObserver((es)=>{
+  es.forEach(e=>{
+    const v = e.target;
+    if(e.isIntersecting){ v.muted = true; v.play().catch(()=>{}); }
+    else { v.pause(); }
+  });
+},{threshold:.5});
+document.querySelectorAll("video").forEach(v=>{
+  // only auto-preview clips that actually have a playable source
+  v.addEventListener("loadeddata", ()=>vObs.observe(v), {once:true});
+});
+</script>
+</body>
+</html>
