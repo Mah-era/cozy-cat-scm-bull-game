@@ -11,6 +11,8 @@
 | **Stack** | React 19 · Vite 6 · hand-authored SVG · layered PNG scene art · Web Audio API · plain CSS |
 | **Status** | Playable end-to-end; production build verified |
 | **Report date** | 2026-07-03 |
+| **Repository** | https://github.com/Mah-era/cozy-cat-scm-bull-game |
+| **Live URL** | https://mah-era.github.io/cozy-cat-scm-bull-game/ |
 
 ---
 
@@ -273,6 +275,10 @@ npm run preview    # serve the production build locally
 - **Output:** `dist/` contains a single hashed JS bundle (~105 kB gzipped) + CSS (~15 kB gzipped)
   + `index.html`. Deployable to any static host.
 - **Dev config:** `.claude/launch.json` prefers port 5199 with auto-porting when that port is busy.
+- **Public repo:** `https://github.com/Mah-era/cozy-cat-scm-bull-game`.
+- **GitHub Pages:** `https://mah-era.github.io/cozy-cat-scm-bull-game/`, served from the
+  `gh-pages` branch. `vite.config.js` sets `base: "/cozy-cat-scm-bull-game/"` so assets resolve
+  correctly under the repository subpath.
 
 ---
 

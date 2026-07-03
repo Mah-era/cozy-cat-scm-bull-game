@@ -2,6 +2,11 @@
 
 A complete local browser game for learning and analyzing the Bullwhip Effect in supply chain management. The player manages a cozy lavender cafe village supply chain across suppliers, warehouse, retail, logistics, customers, and analytics.
 
+## Links
+
+- Live game: [https://mah-era.github.io/cozy-cat-scm-bull-game/](https://mah-era.github.io/cozy-cat-scm-bull-game/)
+- GitHub repository: [https://github.com/Mah-era/cozy-cat-scm-bull-game](https://github.com/Mah-era/cozy-cat-scm-bull-game)
+
 ## Tech Stack
 
 - React
@@ -40,6 +45,8 @@ Preview the production build:
 ```bash
 npm run preview
 ```
+
+The public deployment is served from the `gh-pages` branch. `vite.config.js` sets the base path to `/cozy-cat-scm-bull-game/` so hashed assets load correctly on GitHub Pages.
 
 ## Main Features
 

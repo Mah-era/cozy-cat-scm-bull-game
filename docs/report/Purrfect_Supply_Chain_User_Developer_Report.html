@@ -308,7 +308,8 @@
         <span class="chip c5">Bullwhip analytics</span>
       </div>
       <div class="cta">
-        <a class="btn primary" href="#how-to-play">🎮 Start Playing</a>
+        <a class="btn primary" href="https://mah-era.github.io/cozy-cat-scm-bull-game/" target="_blank" rel="noopener">🎮 Play Live</a>
+        <a class="btn ghost" href="https://github.com/Mah-era/cozy-cat-scm-bull-game" target="_blank" rel="noopener">GitHub Repo</a>
         <a class="btn ghost" href="#setup">🛠 Developer View</a>
         <a class="btn ghost" href="#videos">🎬 Watch Walkthrough</a>
       </div>
@@ -351,7 +352,7 @@
     <h2>How to Play</h2>
     <div class="grid g2" style="align-items:start">
       <ol class="steps">
-        <li><b>Launch the game.</b> Run the commands on the right, open the printed URL, and click <b>☕ Start Village Shift</b> (this also starts the music — turn sound on!).</li>
+        <li><b>Launch the game.</b> Open the live GitHub Pages URL or run the commands on the right locally, then click <b>☕ Start Village Shift</b> (this also starts the music — turn sound on!).</li>
         <li><b>Pick a difficulty.</b> Beginner (12 gentle weeks) → Very Analytical / Expert (24 noisy, tight-margin weeks).</li>
         <li><b>Meet the crew.</b> Optionally rename Miso, Luna, Theo, Ivy &amp; Noah and re-tint their fur.</li>
         <li><b>Watch the city live.</b> On the map, cafe tips (<b>+$</b>) and location <b>+XP</b> popups tick in every couple of seconds — before you decide anything.</li>
@@ -366,7 +367,8 @@
         <pre><span class="c"># from the project root</span>
 npm install
 npm run dev
-<span class="c"># → open http://127.0.0.1:5199/</span>
+<span class="c"># → open the local URL Vite prints</span>
+<span class="c"># public deployment: https://mah-era.github.io/cozy-cat-scm-bull-game/</span>
 
 <span class="c"># production build + preview</span>
 npm run build
@@ -625,8 +627,8 @@ npm run preview</pre>
   <div class="wrap">
     <span class="sec-kicker">SECTION 13 · PLAY</span>
     <h2>Play It Live</h2>
-    <div class="note" style="margin-bottom:16px">🖥 <span>This embed needs the dev server: run <code>npm run dev</code> in the project root, then open this report over the same machine. Opening this file via <code>file://</code> still works — the frame will just show a connection note. Sound requires one click inside the frame.</span></div>
-    <div class="embed"><iframe src="http://127.0.0.1:5199" title="Purrfect Supply Chain: Bullwhip Village — live game" loading="lazy"></iframe></div>
+    <div class="note" style="margin-bottom:16px">🖥 <span>The live embed points to GitHub Pages. Sound requires one click inside the frame.</span></div>
+    <div class="embed"><iframe src="https://mah-era.github.io/cozy-cat-scm-bull-game/" title="Purrfect Supply Chain: Bullwhip Village — live game" loading="lazy"></iframe></div>
   </div>
 </section>
 
@@ -640,23 +642,27 @@ npm run preview</pre>
         <thead><tr><th>Layer</th><th>Choice</th><th>Notes</th></tr></thead>
         <tbody>
           <tr><td><b>UI</b></td><td>React 19</td><td>Hooks drive the real-time tick; StrictMode on.</td></tr>
-          <tr><td><b>Build</b></td><td>Vite 6</td><td>Dev on <code>127.0.0.1:5199</code> (strict port via <code>.claude/launch.json</code>).</td></tr>
+          <tr><td><b>Build</b></td><td>Vite 6</td><td>Dev server prints the local URL; Codex launch config prefers <code>127.0.0.1:5199</code> with auto-porting.</td></tr>
           <tr><td><b>Language</b></td><td>JavaScript + JSX</td><td>No TypeScript; 7 source files, ~10,400 lines.</td></tr>
           <tr><td><b>Styling</b></td><td>Plain CSS (~4,900 lines)</td><td>Full design system, cinematic opener, and animation system; no utility framework.</td></tr>
           <tr><td><b>Graphics</b></td><td>Inline SVG + layered PNG opening art</td><td>Map, cats, and charts are hand-authored SVG; the opening is a manifest-driven stack of active PNG layers.</td></tr>
           <tr><td><b>Audio</b></td><td>Web Audio API</td><td>Procedural music + 11 SFX; zero audio assets.</td></tr>
           <tr><td><b>Persistence</b></td><td>localStorage</td><td>Mute flag only (see Save System).</td></tr>
-          <tr><td><b>Bundle</b></td><td>~95 kB JS + ~9 kB CSS (gz)</td><td>Static-host deployable from <code>dist/</code>.</td></tr>
+          <tr><td><b>Bundle</b></td><td>~105 kB JS + ~17 kB CSS (gz)</td><td>Static-host deployable from <code>dist/</code>.</td></tr>
+          <tr><td><b>Repository</b></td><td><a href="https://github.com/Mah-era/cozy-cat-scm-bull-game">Mah-era/cozy-cat-scm-bull-game</a></td><td>Public GitHub repository.</td></tr>
+          <tr><td><b>Live URL</b></td><td><a href="https://mah-era.github.io/cozy-cat-scm-bull-game/">GitHub Pages</a></td><td>Served from the <code>gh-pages</code> branch.</td></tr>
         </tbody>
       </table>
       <div>
         <pre><span class="c"># develop</span>
 npm install
-npm run dev          <span class="c"># http://127.0.0.1:5199</span>
+npm run dev          <span class="c"># open the local URL Vite prints</span>
 
 <span class="c"># ship</span>
 npm run build        <span class="c"># → dist/</span>
 npm run preview      <span class="c"># serve dist locally</span>
+
+<span class="c"># production: https://mah-era.github.io/cozy-cat-scm-bull-game/</span>
 
 <span class="c"># regenerate report screenshots (scratch tooling)</span>
 <span class="c"># headless playwright script drives a full season</span>
@@ -713,7 +719,7 @@ npm run preview      <span class="c"># serve dist locally</span>
       <div class="tree">cozy-cat-scm-bull-game/
 ├── index.html            <b># Vite entry</b>
 ├── package.json
-├── .claude/launch.json   <b># dev server, port 5199</b>
+├── .claude/launch.json   <b># dev server, prefers port 5199</b>
 ├── docs/
 │   ├── PROJECT_REPORT.md
 │   ├── USER_MANUAL.md
